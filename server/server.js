@@ -12,6 +12,7 @@ const template = fs.readFileSync(path.join(__dirname,'../dist/index.html'),'utf8
 const app = express()
 
 // '/public'开头的文件，全部当做静态文件处理，不走路由这一层,全部指向dist目录
+
 app.use('/public',express.static(path.join(__dirname,'../dist')))
 
 

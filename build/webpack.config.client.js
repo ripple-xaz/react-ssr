@@ -1,5 +1,6 @@
 const path = require('path');
 const HTMLPlugin = require('html-webpack-plugin')
+
 const webpack = require('webpack')
 const isDEV = process.env.NODE_ENV === 'development'
 
@@ -12,6 +13,7 @@ config = {
         filename:'[name].[hash].js',
         path:path.join(__dirname,'../dist'),
         publicPath:'/public' //帮我们区分是静态资源还是一个路由,给静态资源添加前缀 '/public'
+
     },
     module:{
         rules:[
@@ -35,6 +37,7 @@ config = {
     ]
 }
 // 不用public 的静态资源的路径 'app.hash.js'
+
 // 用了public 的静态资源的路径 '/public/app.hash.js'
 
 if (isDEV){
