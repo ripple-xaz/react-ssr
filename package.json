@@ -9,6 +9,7 @@
     "clear": "rimraf dist",
     "build": "npm run clear && npm run build:client && npm run build:server",
     "dev:client": "cross-env NODE_ENV=development webpack-dev-server --config build/webpack.config.client.js",
+    "dev:server": "cross-env NODE_ENV=development node server/server.js",
     "start": "node server/server.js"
   },
   "author": "ripple",
@@ -19,10 +20,22 @@
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "@babel/preset-react": "^7.0.0",
+    "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.6",
     "babel-preset-mobx": "^2.0.0",
     "cross-env": "^5.2.0",
+    "eslint": "^4.12.1",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-react": "^7.5.1",
+    "eslint-plugin-standard": "^3.0.1",
     "html-webpack-plugin": "^3.2.0",
+    "memory-fs": "^0.4.1",
     "react-hot-loader": "^4.8.5",
     "rimraf": "^2.6.3",
     "webpack": "^4.31.0",
@@ -30,6 +43,7 @@
     "webpack-dev-server": "^3.3.1"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "express": "^4.16.4",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
