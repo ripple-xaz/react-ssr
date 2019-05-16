@@ -12,8 +12,7 @@ config = {
     output:{
         filename:'[name].[hash].js',
         path:path.join(__dirname,'../dist'),
-        publicPath:'/public' //帮我们区分是静态资源还是一个路由,给静态资源添加前缀 '/public'
-
+        publicPath:'/public/' //帮我们区分是静态资源还是一个路由,给静态资源添加前缀 '/public'
     },
     module:{
         rules:[
@@ -42,8 +41,8 @@ config = {
 
 if (isDEV){
     config.entry = {
-        app:[
-            'react-hot-loader/patch',
+        app:[ //包含很多文件，全部打包到output
+            'react-hot-loader/patch',//热加载的一个模块
             path.join(__dirname,'../client/client-entry.js')
         ]
        
@@ -56,10 +55,9 @@ if (isDEV){
         overlay:{ //有错误是弹窗提示
             errors:true //之弹出错误信息，不弹出warning
         },
-        publicPath:'/public',//要访问静态资源路径，必须要在前面加 '/public' 才能访问到
+        publicPath:'/public/',//要访问静态资源路径，必须要在前面加 '/public' 才能访问到
         historyApiFallback:{ //配置对应关系
             index:'/public/index.html' // 404s will fallback to '/public/index.html' 
-
         }
     }
     config.plugins.push(new webpack.HotModuleReplacementPlugin())

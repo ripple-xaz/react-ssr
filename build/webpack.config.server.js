@@ -10,7 +10,7 @@ module.exports = {
     output:{
         filename:'server-entry.js',//服务端没有缓冲的概念
         path:path.join(__dirname,'../dist'),
-        publicPath:'/public' ,//帮我们区分是静态资源还是一个路由
+        publicPath:'/public/' ,//帮我们区分是静态资源还是一个路由
         libraryTarget:'commonjs2' //模块方案 UMD、AMD、CMD、commonjs
     },
     module:{

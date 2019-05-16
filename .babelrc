@@ -1,8 +1,4 @@
 {
-<<<<<<< HEAD
     "presets": ["@babel/preset-env", "@babel/preset-react", "mobx"],
     "plugins":["react-hot-loader/babel"]
-=======
-    "presets": ["@babel/preset-env", "@babel/preset-react", "mobx"]
->>>>>>> 223dfa4f33cccb705b9d6d9a6a558cd82f85c470
 }
