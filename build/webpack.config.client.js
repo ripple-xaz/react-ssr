@@ -8,7 +8,7 @@ const isDEV = process.env.NODE_ENV === 'development'
 //  扔出一个webpack的配置对象
 const config =webpackMerge(baseConfig,{
   entry:{
-      app:path.join(__dirname,'../client/client-entry.js')
+      app:path.join(__dirname,'../client/app.js')
   },
   output:{
       filename:'[name].[hash].js',
@@ -21,14 +21,13 @@ const config =webpackMerge(baseConfig,{
 })
 
 // 不用public 的静态资源的路径 'app.hash.js'
-
 // 用了public 的静态资源的路径 '/public/app.hash.js'
 
 if (isDEV){
     config.entry = {
         app:[ //包含很多文件，全部打包到output
             'react-hot-loader/patch',//热加载的一个模块
-            path.join(__dirname,'../client/client-entry.js')
+            path.join(__dirname,'../client/app.js')
         ]
 
     }

@@ -12,20 +12,28 @@ module.exports = {
         test: /.(js|jsx)$/,
         loader: 'eslint-loader',
         exclude: [//  不eslint 以下路径
-          path.join(__dirname, '../node_modules'),
-          path.join(__dirname, '../client/client-entry.js')
-        ]
+          path.join(__dirname, '../node_modules')
+        ],
+        resolve: {
+            extensions: ['.js', '.jsx'],
+        }
       },
       {
         test: /.jsx$/, // 正则匹配，以jsx结尾的文件
-        loader: 'babel-loader' // 用babel-loader去进行编译，babel-loader是个插件，并不包含babel核心代码，要安装babel-core
+        loader: 'babel-loader',// 用babel-loader去进行编译，babel-loader是个插件，并不包含babel核心代码，要安装babel-core
+        resolve: {
+            extensions: ['.js', '.jsx'],
+        },
       },
       {
         test: /.js$/, //  正则匹配，以jsx结尾的文件
         loader: 'babel-loader', // 用babel-loader去进行编译，babel-loader是个插件，并不包含babel核心代码，要安装babel-core
         exclude: [ // 不babel以下路径的文件
           path.join(__dirname, '../node_modules')
-        ]
+        ],
+        resolve: {
+            extensions: ['.js', '.jsx'],
+        },
       }
     ]
   }
