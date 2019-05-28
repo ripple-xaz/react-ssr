@@ -42,6 +42,9 @@ if (isDEV){
         publicPath:'/public/',//要访问静态资源路径，必须要在前面加 '/public' 才能访问到
         historyApiFallback:{ //配置对应关系
             index:'/public/index.html' // 404s will fallback to '/public/index.html'
+        },
+        proxy:{
+          '/api': 'http://localhost:3333'
         }
     }
     config.plugins.push(new webpack.HotModuleReplacementPlugin())
