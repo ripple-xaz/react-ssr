@@ -1,14 +1,18 @@
 import {
   observable,
   computed,
-  autorun,
   action,
 } from 'mobx'
 
-export class AppState {
-  @observable count = 0
+export default class AppState {
+  constructor({ count, name } = { count: 0, name: 'Jokoy' }) {
+    this.count = count
+    this.name = name
+  }
 
-  @observable name = 'Jokcy'
+  @observable count
+
+  @observable name
 
   //  用appState.msg的方法就可以获取到return的值
   @computed get msg() {
@@ -24,17 +28,12 @@ export class AppState {
   @action changeName(name) {
     this.name = name
   }
+
+  //  将store中的数据转换成 { appState: { count: 1, name: 'Jokoy' } }
+  toJson() {
+    return {
+      count: this.count,
+      name: this.name,
+    }
+  }
 }
-
-const appState = new AppState()
-
-// 监听state的变化，如果有，执行回调
-autorun(() => {
-  // dosomething
-})
-
-setInterval(() => {
-  appState.add()
-}, 1000);
-
-export default appState

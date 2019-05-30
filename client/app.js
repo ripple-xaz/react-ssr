@@ -4,8 +4,8 @@ import React from 'react'
 //  react-dom 是 react 专门为web端开发的渲染工具，而在服务端，react-dom/server提供我们将react组件渲染成HTML的方法
 import ReactDOM from 'react-dom'
 import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'mobx-react'
-import appState from './store/app-state';
+import { Provider } from 'mobx-react' // Provider设置mobx数据的容器
+import AppState from './store/app-state';
 import App from './views/App'
 
 //  react推荐有默认的节点去挂载App
@@ -13,11 +13,14 @@ import App from './views/App'
 //  服务端没有document这个对象的
 // ReactDOM.hydrate(<App />,document.getElementById('root'))
 
+// __INITIAL__STATE__为服务端的store,传入客户端，是为了保证两边一致
+const initialState = window.__INITIAL__STATE__ || {} //eslint-disable-line
+
 const renderMethod = module.hot ? ReactDOM.render : ReactDOM.hydrate;
 
 const render = (Component) => {
   renderMethod(
-    <Provider appState={appState}>
+    <Provider appState={new AppState(initialState.appState)}>
       <BrowserRouter>
         <Component />
       </BrowserRouter>

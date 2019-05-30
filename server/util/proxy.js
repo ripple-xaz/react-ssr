@@ -1,5 +1,5 @@
 const axios = require('axios');
-
+const queryString = require('query-string');
 const baseUrl = 'http://cnodejs.org/api/v1'
 
 //  1、无需accessToken就能请求的接口
@@ -19,15 +19,18 @@ module.exports = function(req,res) {
   }
 
   // 删掉query中的accessToken
-  const query = Object.assign({}, req.query)
+  const query = Object.assign({}, req.query,{
+    accesstoken: (needAccessToken && req.method === 'GET') ? user.accessToken : ''
+  })
   if(query.needAccessToken) delete query.needAccessToken
 
   axios(`${baseUrl}${path}`,{
     method: req.method,
     params: query,
-    data: Object.assign({},req.body,{
-      accessToken: user.accessToken
-    }),
+    // {'accesstoken': 'xxx'} 通过queryString.stringify转换之后 'accesstoken=xxx'
+    data: queryString.stringify(Object.assign({},req.body,{
+      accesstoken: (needAccessToken && req.method === 'POST') ? user.accessToken : ''
+    })),
     headers: {
       "Content-Type": "application/www-form-urlencode"
     }

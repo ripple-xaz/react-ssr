@@ -11,12 +11,16 @@ const config =webpackMerge(baseConfig,{
       app:path.join(__dirname,'../client/app.js')
   },
   output:{
-      filename:'[name].[hash].js',
+      filename: '[name].[hash].js',
   },
   plugins:[
-      new HTMLPlugin({
-          template:path.join(__dirname,'../template.html')
-      })
+    new HTMLPlugin({
+      template: path.join(__dirname,'../template.html')
+    }),
+    new HTMLPlugin({
+      template: '!!ejs-compiled-loader!' + path.join(__dirname,'../server.template.ejs'),
+      filename: 'server.ejs'
+    })
   ]
 })
 
@@ -32,9 +36,9 @@ if (isDEV){
 
     }
     config.devServer = {
-        host:'0.0.0.0', //方便别人连接你的IP进行调试
-        port:'8888',
-        contentBase:path.join(__dirname,'../public'), //devServer静态文件的位置
+        host: '0.0.0.0', //方便别人连接你的IP进行调试
+        port: '8888',
+        contentBase: path.join(__dirname,'../public'), //devServer静态文件的位置
         hot:true,
         overlay:{ //有错误是弹窗提示
             errors:true //之弹出错误信息，不弹出warning

@@ -3,13 +3,16 @@ const webpack = require('webpack')
 const path = require('path')
 const MemoryFs = require('memory-fs') //  从内存上读写文件
 const proxy = require('http-proxy-middleware')
+const bootstrapper = require('react-async-bootstrapper')
+const ejs = require('ejs');
+const serialize = require('serialize-javascript');
 const reactDomServer = require('react-dom/server')
 const serverConfig = require('../../build/webpack.config.server')
 
 //  由于在开发环境，webpack处理后文件不会写在硬盘里面，没有办法去读取文件，用http请求的方式，在客户端webpack-dev-server打包出来的站点下面
 const getTemplate = () => {
   return new Promise((resolve, reject) => {
-    axios.get('http://localhost:8888/public/index.html')
+    axios.get('http://localhost:8888/public/server.ejs')
       .then(res => {
         resolve(res.data)
       })
@@ -19,6 +22,14 @@ const getTemplate = () => {
   })
 }
 
+//将store中的数据转换成 { appState: { count: 1, name: 'Jokoy' } }
+const getStoreState = (stores) => {
+  return Object.keys(stores).reduce((result,storeName) => {
+    result[storeName] = stores[storeName].toJson()
+    return result
+  },{})
+}
+
 const Module = module.constructor
 const mfs = new MemoryFs() // 实例化memory-fs模块
 serverConfig.mode = 'development'
@@ -26,7 +37,7 @@ serverConfig.mode = 'development'
 const serverCompiler = webpack(serverConfig) // 生成编译器
 serverCompiler.outputFileSystem = mfs // 以前用fs读写文件，现在用mfs读写文件，从内存中读写文件会比硬盘快很多
 
-let serverBundle
+let serverBundle, createStoreMap
 
 //  编译的所有文件是否有变化，如果有变化，会重新去编译
 serverCompiler.watch({
@@ -47,8 +58,11 @@ serverCompiler.watch({
 
   //  为了使用 reactDomServer.renderToString 方法，必须将webpack生成的内容封装成module
   const m = new Module()
-  m._compile(bundle, 'server-entry.js') //  生成新的模块,并制定文件名去定义
+  m._compile(bundle, 'app.js') //  生成新的模块,并制定文件名去定义
   serverBundle = m.exports.default
+  createStoreMap = m.exports.createStoreMap
+
+  console.log('webpack:-------------compile over-------------')
 })
 
 module.exports = function (app) {
@@ -57,12 +71,45 @@ module.exports = function (app) {
     target: 'http://localhost:8888'
   }))
 
-  app.get('/', function (req, res, next) {
+  app.get('*', function (req, res, next) {
+
+    if(!serverBundle){
+      return
+    }
+
     getTemplate().then(template => {
-      // res.send(template) //template.html里的内容，引入script的路劲就是bundlePath
-      const content = reactDomServer.renderToString(serverBundle)
-      //  res.send(content) //  <div data-reactroot="">This is App</div>
-      res.send(template.replace('<!-- app -->', content))
+      // router上下文，再经过reactDomServer.renderToString后会变成
+      // { action: 'REPLACE',location: {pathname: '/list',search: '',hash: '',state: undefined},url: '/list'}
+      const routerContex = {}
+      const stores = createStoreMap()
+      const app = serverBundle(stores,routerContex,req.url)
+
+      //服务端渲染用到一些异步的数据，拿到一些数据去渲染内容，比如在topiclist拿到一些内容比如appState中的msg，并改变它，改变的过程是异步的
+      bootstrapper(app)
+      .then(() => {
+
+        const content = reactDomServer.renderToString(app)
+        const state = getStoreState(stores)
+
+        //对于有redirect属性的路由，先重定向后返回给客户端
+        if(routerContex.url){
+          res.status(302).setHeader('Location',routerContex.url)
+          res.end() //结束本次请求
+          return
+        }
+
+        //用ejs 将 APPString 和 initialstate 替换
+        const html = ejs.render(template,{
+          appString: content,
+          initialState: serialize(state) //state为 [object object] 序列化state
+        })
+
+        res.send(html)
+
+        // res.send(template.replace('<!-- app -->', content))
+      })
+      .catch(err => console.log('Eek, error!', err))
     })
   })
+
 }

@@ -12,7 +12,8 @@ module.exports = {
         test: /.(js|jsx)$/,
         loader: 'eslint-loader',
         exclude: [//  不eslint 以下路径
-          path.join(__dirname, '../node_modules')
+          path.join(__dirname, '../node_modules'),
+          path.join(__dirname, '../server/app-server.js'),
         ],
         resolve: {
             extensions: ['.js', '.jsx'],

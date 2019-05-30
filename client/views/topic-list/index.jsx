@@ -5,7 +5,7 @@ import {
   observer,
   inject,
 } from 'mobx-react';
-import { AppState } from '../../store/app-state';
+import AppState from '../../store/app-state';
 
 //  装饰器
 @inject('appState') @observer
@@ -17,6 +17,16 @@ class TopicList extends Component {
 
   componentDidMount() {
     // do
+  }
+
+  bootstrap() {
+    const { appState } = this.props
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        appState.add()
+        resolve(true)
+      })
+    })
   }
 
   changeName(event) {
