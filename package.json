@@ -11,7 +11,7 @@
     "dev:client": "cross-env NODE_ENV=development webpack-dev-server --config build/webpack.config.client.js",
     "dev:server": "cross-env NODE_ENV=development node server/server.js",
     "nodemon": "nodemon server/server.js",
-    "start": "node server/server.js"
+    "start": "cross-env NODE_ENV=production node server/server.js"
   },
   "author": "ripple",
   "license": "ISC",

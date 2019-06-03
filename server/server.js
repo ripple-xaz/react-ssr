@@ -5,7 +5,7 @@ const path = require('path')
 const bodyParser = require('body-parser');
 const favicon =  require('serve-favicon')
 const session = require('express-session');
-
+const serverRender = require('./util/server-render')
 const isDev = process.env.NODE_ENV === 'development'
 
 const app = express()
@@ -30,22 +30,26 @@ app.use('/api',require('./util/proxy'))
 
 if (!isDev) {
   //  nodejs 中 require 不会去读default里面的内容，
-  const serverEntry = require('../dist/app').default
+  const serverEntry = require('../dist/app-server')
 
   //  不加utf8为buffer的数据格式，加了之后为字符串
-  const template = fs.readFileSync(path.join(__dirname, '../dist/index.html'), 'utf8')
+  const template = fs.readFileSync(path.join(__dirname, '../dist/server.ejs'), 'utf8')
 
   // '/public'开头的文件，全部当做静态文件处理，不走路由这一层,全部指向dist目录
   app.use('/public', express.static(path.join(__dirname, '../dist')))
 
-  app.get('*', function (req, res) {
-    const appString = ReactSSR.renderToString(serverEntry)
-    res.send(template.replace('<!-- app -->', appString))
+  app.get('*', function (req, res, next) {
+    serverRender(serverEntry, template, req, res).catch(next)
   })
 } else {
   const devStatic = require('./util/dev-static')
   devStatic(app)
 }
+
+app.use(function(err, req, res, next){
+  console.log(err)
+  res.status(500).send(err)
+})
 
 app.listen(3333, function () {
   console.log('server is listening on 3333')
