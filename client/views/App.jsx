@@ -13,8 +13,7 @@ export default class App extends Component {
     // 路由和导航渲染的方式，return一个数组。
     return [
       <div key="banner">
-        <Link to="/">首页</Link>
-        <br />
+        <Link to="/">首页/</Link>
         <Link to="/detail">详情页</Link>
       </div>,
       <Routes key="routes" />,

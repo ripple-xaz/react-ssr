@@ -7,6 +7,7 @@ module.exports = webpackMerge(baseConfig,{
   entry:{
     app:path.join(__dirname,'../server/app-server.js')
   },
+  externals: Object.keys(require('../package.json').dependencies), // 在这里面指定的某些包，不打包输出到js里面
   output:{
     filename:'app-server.js',// 服务端没有缓冲的概念
     libraryTarget:'commonjs2' //  模块方案 UMD、AMD、CMD、commonjs

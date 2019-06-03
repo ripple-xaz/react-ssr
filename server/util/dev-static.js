@@ -8,17 +8,33 @@ const ejs = require('ejs');
 const serialize = require('serialize-javascript');
 const reactDomServer = require('react-dom/server')
 const serverConfig = require('../../build/webpack.config.server')
+const Helmet = require('react-helmet').default;
+
+// 获取从字符串中获取模块
+const NativeModule = require('module')
+const vm = require('vm')
+const getModuleFromString = (bundle,filename) => {
+  const m = { exports: {} }
+  const wrapper = NativeModule.wrap(bundle)
+  const script = new vm.Script(wrapper, {
+    filename: filename,
+    displayErrors: true
+  })
+  const result = script.runInThisContext()
+  result.call(m.exports,m.exports,require,m)
+  return m
+}
 
 //  由于在开发环境，webpack处理后文件不会写在硬盘里面，没有办法去读取文件，用http请求的方式，在客户端webpack-dev-server打包出来的站点下面
 const getTemplate = () => {
   return new Promise((resolve, reject) => {
     axios.get('http://localhost:8888/public/server.ejs')
-      .then(res => {
-        resolve(res.data)
-      })
-      .catch(err => {
-        console.error('get template error', err)
-      })
+    .then(res => {
+      resolve(res.data)
+    })
+    .catch(err => {
+      console.error('get template error', err)
+    })
   })
 }
 
@@ -50,15 +66,17 @@ serverCompiler.watch({
   stats.warnings.forEach(warn => console.warn(2, warn))
 
   const bundlePath = path.join( //  将webpack output中的内容生成字符串，返回到浏览器
-    serverConfig.output.path,
+    serverConfig.output.path,//
     serverConfig.output.filename
   )
 
   const bundle = mfs.readFileSync(bundlePath, 'utf8') //  读的内容是string内容
 
   //  为了使用 reactDomServer.renderToString 方法，必须将webpack生成的内容封装成module
-  const m = new Module()
-  m._compile(bundle, 'app.js') //  生成新的模块,并制定文件名去定义
+  // const m = new Module()
+  // m._compile(bundle, 'app.js') //  生成新的模块,并制定文件名去定义
+
+  const m = getModuleFromString(bundle,'app.js')
   serverBundle = m.exports.default
   createStoreMap = m.exports.createStoreMap
 
@@ -84,14 +102,14 @@ module.exports = function (app) {
       const stores = createStoreMap()
       const app = serverBundle(stores,routerContex,req.url)
 
-      //服务端渲染用到一些异步的数据，拿到一些数据去渲染内容，比如在topiclist拿到一些内容比如appState中的msg，并改变它，改变的过程是异步的
+      // 服务端渲染用到一些异步的数据，拿到一些数据去渲染内容，比如在topiclist拿到一些内容比如appState中的msg，并改变它，改变的过程是异步的
       bootstrapper(app)
       .then(() => {
-
+        const helmet = Helmet.rewind()
         const content = reactDomServer.renderToString(app)
         const state = getStoreState(stores)
 
-        //对于有redirect属性的路由，先重定向后返回给客户端
+        // 对于有redirect属性的路由，先重定向后返回给客户端
         if(routerContex.url){
           res.status(302).setHeader('Location',routerContex.url)
           res.end() //结束本次请求
@@ -101,7 +119,11 @@ module.exports = function (app) {
         //用ejs 将 APPString 和 initialstate 替换
         const html = ejs.render(template,{
           appString: content,
-          initialState: serialize(state) //state为 [object object] 序列化state
+          initialState: serialize(state), //state为 [object object] 序列化state
+          meta: helmet.meta.toString(),
+          title: helmet.title.toString(),
+          style: helmet.style.toString(),
+          link: helmet.link.toString(),
         })
 
         res.send(html)
